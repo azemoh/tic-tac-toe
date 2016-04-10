@@ -1,9 +1,9 @@
 $(document).ready(function() {
 
-	
+
 
 	/* *******************
-		SETUP VARIABLES 
+		SETUP VARIABLES
 	******************* */
 
 	var winner;
@@ -50,7 +50,7 @@ $(document).ready(function() {
 	})
 
 
-	
+
 	/* Check if the Square has Already Been Played */
 
 	function checkIfSquareFree(squareNumber) {
@@ -68,12 +68,12 @@ $(document).ready(function() {
 	function addWinToTable() {
 
 		if (winner === 'X') {
-			Xwins++ 
+			Xwins++
 
 			// Add new row to table
 			$('.scores tbody').append('<tr><td>'+gameNumber+'</td><td>Win</td><td>Lose</td></tr>');
 		} else {
-			Owins++ 
+			Owins++
 
 			// Add new row to table
 			$('.scores tbody').append('<tr><td>'+gameNumber+'</td><td>Lose</td><td>Win</td></tr>');
@@ -92,7 +92,7 @@ $(document).ready(function() {
 
 	function registerWin(x, y, z) {
 
-		if ( 
+		if (
 
 			// All three winning squares played
 			$('.square[data-square="'+x+'"]').data("played") === true &&
@@ -102,8 +102,8 @@ $(document).ready(function() {
 			&&
 
 			// All three squares played by the same player
-			$('.square[data-square="'+x+'"]').data("player") === $('.square[data-square="'+y+'"]').data("player") 
-			&& $('.square[data-square="'+x+'"]').data("player") === $('.square[data-square="'+z+'"]').data("player") ) 
+			$('.square[data-square="'+x+'"]').data("player") === $('.square[data-square="'+y+'"]').data("player")
+			&& $('.square[data-square="'+x+'"]').data("player") === $('.square[data-square="'+z+'"]').data("player") )
 
 		{
 
@@ -112,12 +112,12 @@ $(document).ready(function() {
 
 		} else {
 			return false;
-		}	
+		}
 
 	} // end registerWin
 
 
-	/* Check if there is a draw */ 
+	/* Check if there is a draw */
 
 	function checkDraw() {
 
@@ -135,11 +135,11 @@ $(document).ready(function() {
 
 		// Loop through all winning combinations
 		for (i = 0; i < wins.length; i++) {
-			
+
 			var w = registerWin(wins[i][0], wins[i][1], wins[i][2]);
 
 			if (w) {
-				
+
 				alert(winner+ " won!");
 				addWinToTable();
 				clearBoard();
@@ -158,111 +158,150 @@ $(document).ready(function() {
 		O PLAY
 	******************* */
 
-	/* Funciton to check if 2 of 3 winning squares have been played by the same player */
+  // Temp board for AI
+  var board = [];
 
-	function checkTacticalPlay(x, y, z) {
+  function OPlay() {
+    fillBoard()
+    var move = minMax(5, "O", -Infinity, Infinity)[1]
 
-		// x and y played
-		if ( 
-			// 2 out of the 3 winning squares
-			$('.square[data-square="'+x+'"]').data("played") === true &&
-			$('.square[data-square="'+y+'"]').data("played") === true
+    $('.square[data-square="'+move+'"').addClass("Oplayed");
+    $('.square[data-square="'+move+'"').addClass("played");
+    $('.square[data-square="'+move+'"').data("played", true);
+    $('.square[data-square="'+move+'"').data("player", "O");
 
-			&&
+    board = []
 
-			// Both squares played by the same player
-			$('.square[data-square="'+x+'"]').data("player") === $('.square[data-square="'+y+'"]').data("player")
-			) {
+    checkWin();
+  }
 
-			// Return remaining square
-			return z;
-		} 
+  // fill temp board for AI
+  function fillBoard() {
+    for (var i = 1; i <= 9; i++) {
+      if ($('.square[data-square="'+i+'"]').data("played") === true) {
+        var player = $('.square[data-square="'+i+'"]').data("player");
+        board.push(player);
+      } else {
+        board.push("");
+      }
+    }
+  }
 
-		// x and z played
-		else if ( 
-			$('.square[data-square="'+x+'"]').data("played") === true &&
-			$('.square[data-square="'+z+'"]').data("played") === true
-			&&
-			$('.square[data-square="'+x+'"]').data("player") === $('.square[data-square="'+z+'"]').data("player")
-			) {
-			return y;
-		}
+  /** Min Max algorith with alpha, beta prunning
+   *  Return best possible move.
+   *  use dept to determine game difficulty
+   */
+  function minMax(dept, player, alpha, beta) {
+    var bestMove = -1;
+    var score = 0;
 
-		// z and y played
-		else if ( 
-			$('.square[data-square="'+z+'"]').data("played") === true &&
-			$('.square[data-square="'+y+'"]').data("played") === true
-			&&
-			$('.square[data-square="'+z+'"]').data("player") === $('.square[data-square="'+y+'"]').data("player")
-			) {
+    if (over() || dept === 0) {
+      score = scoreBoard();
+      return [score, bestMove];
+    }
 
-			return x;
-		} 
+    var validMOves = possibleMoves();
 
-		else {
-			return false;
-		}
-	}
+    for (var i = 0; i < validMOves.length; i++) {
+      board[validMOves[i] - 1] = player; // Account for array index
 
-	/* Random play for O if no tactical play available */
-	function ORandomPlay() {
+      if (player === "O") { // If AI's turn
+        score = minMax(dept-1, "X", alpha, beta)[0];
+        if (score > alpha) {
+          alpha = score;
+          bestMove = validMOves[i];
+        }
+      } else { // If opponet's turn
+        score = minMax(dept-1, "O", alpha, beta)[0]
+        if (score < beta) {
+          beta = score;
+          bestMove = validMOves[i];
+        }
+      }
 
-		// Loop to find a valid play
-		for (var i = 0; i < 100; i++) {
-		
-			var n = Math.floor((Math.random() * 9) + 1);
-			if ( checkIfSquareFree( n ) ) {
+      board[validMOves[i] - 1] = ""; // Undo move
 
-				$('.square[data-square="'+n+'"').addClass("Oplayed");
-				$('.square[data-square="'+n+'"').addClass("played");
-				$('.square[data-square="'+n+'"').data("played", true);
-				$('.square[data-square="'+n+'"').data("player", "O");
+      // Prune: stop iteration if alpha >= beta
+      if (alpha >= beta) break;
+    }
 
-				checkWin();
-				break;
-			} 
+    score = (player === "O")? alpha : beta;
 
-		}
-	}
+    return [score, bestMove]
+  }
 
+  // Check if game is won or board is full
+  function over() {
+    return (won() || board.indexOf("") === -1)
+  }
 
-	function OPlay() {
+  // Check board for winning combination
+  function won() {
+    for (var i = 0; i < wins.length; i++) {
+      if (board[wins[i][0] - 1] !== "") {
+        if (board[wins[i][0] - 1] === board[wins[i][1] - 1] &&
+            board[wins[i][1] - 1] === board[wins[i][2] - 1]) {
+              return true;
+            }
+      }
+    }
+    return false;
+  }
 
-		// Loop through all winning combinations
-		for (i = 0; i < wins.length; i++) {
+  // Return an array of possible/unplayed moves
+  function possibleMoves() {
+    var moves = [];
+    for (var i = 1; i <= 9; i++) {
+      if (board[i - 1] === "") moves.push(i);
+    }
+    return moves;
+  }
 
-			// Check for tactical play
-			var tacticalPlay = checkTacticalPlay(wins[i][0], wins[i][1], wins[i][2]);
+  // Evaluate and score a possible move.
+  function scoreBoard() {
+    score = 0;
+    for (var i = 0; i < wins.length; i++) {
+      score += evaluateCombo(wins[i])
+    }
+    return score;
+  }
 
+  /** Evaluate a win combination
+   * Return +100, +10, +1 for 3, 2, 1 in a row for AI
+   * Return -100, -10, -1 for 3, 2, 1 in a row for opponet
+   */
+  function evaluateCombo(combo) {
+    score = 0
 
-			if (tacticalPlay) {
+    // one in a row
+    if (board[combo[0] - 1] === "O")  score = 1;
+    else if (board[combo[0] - 1] === "X") score = -1;
 
-				if ( checkIfSquareFree( tacticalPlay ) ) {
+    // two in a row
+    if (board[combo[1] - 1] === "O") {
+      if (score === 1) score = 10; // two in a row for AI
+      else if (score === -1) return 0;
+      else score = 1;
+    } else if (board[combo[1] - 1] === "X") {
+      if (score === -1) score = -10; // two in a row for opponet
+      else if (score == 1) return 0;
+      else score = -1;
+    }
 
-					$('.square[data-square="'+tacticalPlay+'"').addClass("Oplayed");
-					$('.square[data-square="'+tacticalPlay+'"').addClass("played");
-					$('.square[data-square="'+tacticalPlay+'"').data("played", true);
-					$('.square[data-square="'+tacticalPlay+'"').data("player", "O");
+    // Three in a row
+    if (board[combo[2] - 1] === "O") {
+      if (score > 0) score *= 10; // three in a row for AI
+      else if (score < 0) return 0;
+      else score = 1;
+    } else if (board[combo[1] - 1] === "X") {
+      if (score < 0) score *= 10; // three in a row for opponet
+      else if (score > 1) return 0;
+      else score = -1;
+    }
 
-					checkWin();
-					break;
+    return score;
+  }
 
-				} else {
-					ORandomPlay();
-				}
-			}
-
-
-			if ( !tacticalPlay && i === (wins.length - 1) ) {
-				ORandomPlay();
-			}
-		} // end loop
-
-	}
-
-
-
-	
 
 	/* *******************
 		X PLAY
@@ -285,13 +324,13 @@ $(document).ready(function() {
 		} else {
 			alert("Square already played. Please try again.")
 		}
-		
+
 
 	})
 
 
-	
-		
+
+
 
 
 
