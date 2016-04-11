@@ -158,19 +158,26 @@ $(document).ready(function() {
 		O PLAY
 	******************* */
 
+  // Set difficulty
+  var difficulty = $('#difficulty').val();
+
+  $('#difficulty').on('change', function () {
+    difficulty = $('#difficulty').val();
+  });
+
   // Temp board for AI
   var board = [];
 
   function OPlay() {
-    fillBoard()
-    var move = minMax(5, "O", -Infinity, Infinity)[1]
+    fillBoard();
+    var move = minMax(difficulty, "O", -Infinity, Infinity)[1];
 
     $('.square[data-square="'+move+'"').addClass("Oplayed");
     $('.square[data-square="'+move+'"').addClass("played");
     $('.square[data-square="'+move+'"').data("played", true);
     $('.square[data-square="'+move+'"').data("player", "O");
 
-    board = []
+    board = [];
 
     checkWin();
   }
@@ -271,7 +278,7 @@ $(document).ready(function() {
    * Return -100, -10, -1 for 3, 2, 1 in a row for opponet
    */
   function evaluateCombo(combo) {
-    score = 0
+    score = 0;
 
     // one in a row
     if (board[combo[0] - 1] === "O")  score = 1;

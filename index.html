@@ -3,9 +3,9 @@
 <head>
 	<meta charset="utf-8">
 	<title>Tic Tac Toe</title>
-	
+
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-		
+
 	<link href='https://fonts.googleapis.com/css?family=Ubuntu:400,300,500,700' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" href="style.css">
 
@@ -26,7 +26,7 @@
 	<div class="board-container">
 
 		<div class="grid">
-		
+
 		<div class="square" data-square="1" data-player="">1</div>
 		<div class="square" data-square="2" data-player="">2</div>
 		<div class="square" data-square="3" data-player="">3</div>
@@ -49,7 +49,12 @@
 
 		<button class="reset-board-button">Reset Board</button>
 
-		
+    <label for="difficulty">Mode:</label>
+    <select id="difficulty">
+      <option value="5" selected >Unbeatable</option>
+      <option value="2">Beatable</option>
+    </select>
+
 	</div><!--
 
 	--><div class="scoreboard-container">
@@ -77,9 +82,9 @@
 		</table>
 
 
-		
-		
-		
+
+
+
 	</div>
 
 
