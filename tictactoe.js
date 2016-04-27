@@ -196,7 +196,8 @@ $(document).ready(function() {
     }
   }
 
- /**
+/**
+ * MiniMax Algorithm with Alpha-beta prunning
  * Determine the best move for Computer player.
  * @param {Number} dept - Dept of game tree
  * @param {string} player - Current player's piece, X or O
