@@ -170,12 +170,14 @@ $(document).ready(function() {
 
   function OPlay() {
     fillBoard();
-    var move = minMax(difficulty, "O", -Infinity, Infinity)[1];
+    var move = miniMax(difficulty, "O", -Infinity, Infinity)[1];
 
-    $('.square[data-square="'+move+'"').addClass("Oplayed");
-    $('.square[data-square="'+move+'"').addClass("played");
-    $('.square[data-square="'+move+'"').data("played", true);
-    $('.square[data-square="'+move+'"').data("player", "O");
+    var $square = $('.square[data-square="'+move+'"');
+
+    $square.addClass("Oplayed");
+    $square.addClass("played");
+    $square.data("played", true);
+    $square.data("player", "O");
 
     board = [];
 
@@ -185,20 +187,24 @@ $(document).ready(function() {
   // fill temp board for AI
   function fillBoard() {
     for (var i = 1; i <= 9; i++) {
-      if ($('.square[data-square="'+i+'"]').data("played") === true) {
-        var player = $('.square[data-square="'+i+'"]').data("player");
-        board.push(player);
+      var $square = $('.square[data-square="'+i+'"]');
+      if ($square.data("played") === true) {
+        board.push($square.data("player"));
       } else {
         board.push("");
       }
     }
   }
 
-  /** Min Max algorith with alpha, beta prunning
-   *  Return best possible move.
-   *  use dept to determine game difficulty
-   */
-  function minMax(dept, player, alpha, beta) {
+ /**
+ * Determine the best move for Computer player.
+ * @param {Number} dept - Dept of game tree
+ * @param {string} player - Current player's piece, X or O
+ * @param {Number} alpha - Negative Infinity
+ * @param {Number} beta - Postive Infinity
+ * @returns {Array} Array containing bestMove and bestScore
+ */
+  function miniMax(dept, player, alpha, beta) {
     var bestMove = -1;
     var score = 0;
 
@@ -207,26 +213,26 @@ $(document).ready(function() {
       return [score, bestMove];
     }
 
-    var validMOves = possibleMoves();
+    var validMoves = possibleMoves();
 
-    for (var i = 0; i < validMOves.length; i++) {
-      board[validMOves[i] - 1] = player; // Account for array index
+    for (var i = 0; i < validMoves.length; i++) {
+      board[validMoves[i] - 1] = player; // Account for array index
 
       if (player === "O") { // If AI's turn
-        score = minMax(dept-1, "X", alpha, beta)[0];
+        score = miniMax(dept-1, "X", alpha, beta)[0];
         if (score > alpha) {
           alpha = score;
-          bestMove = validMOves[i];
+          bestMove = validMoves[i];
         }
       } else { // If opponet's turn
-        score = minMax(dept-1, "O", alpha, beta)[0]
+        score = miniMax(dept-1, "O", alpha, beta)[0]
         if (score < beta) {
           beta = score;
-          bestMove = validMOves[i];
+          bestMove = validMoves[i];
         }
       }
 
-      board[validMOves[i] - 1] = ""; // Undo move
+      board[validMoves[i] - 1] = ""; // Undo move
 
       // Prune: stop iteration if alpha >= beta
       if (alpha >= beta) break;
@@ -264,7 +270,10 @@ $(document).ready(function() {
     return moves;
   }
 
-  // Evaluate and score a possible move.
+  /**
+   * Score the current game state
+   * @returns {Number} Score for current game state.
+   */
   function scoreBoard() {
     score = 0;
     for (var i = 0; i < wins.length; i++) {
@@ -273,9 +282,12 @@ $(document).ready(function() {
     return score;
   }
 
-  /** Evaluate a win combination
+  /**
+   * Evaluate a win combination
    * Return +100, +10, +1 for 3, 2, 1 in a row for AI
    * Return -100, -10, -1 for 3, 2, 1 in a row for opponet
+   * @param {Array} combo - Winning combination
+   * @returns {Number} Score for a giving win combination
    */
   function evaluateCombo(combo) {
     score = 0;
