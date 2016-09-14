@@ -253,10 +253,9 @@ $(document).ready(function() {
   function won() {
     for (var i = 0; i < wins.length; i++) {
       if (board[wins[i][0] - 1] !== "") {
-        if (board[wins[i][0] - 1] === board[wins[i][1] - 1] &&
-            board[wins[i][1] - 1] === board[wins[i][2] - 1]) {
-              return true;
-            }
+        if (board[wins[i][0] - 1] === board[wins[i][1] - 1] && board[wins[i][1] - 1] === board[wins[i][2] - 1]) {
+	  return true;
+	}
       }
     }
     return false;
@@ -276,7 +275,7 @@ $(document).ready(function() {
    * @returns {Number} Score for current game state.
    */
   function scoreBoard() {
-    score = 0;
+    var score = 0;
     for (var i = 0; i < wins.length; i++) {
       score += evaluateCombo(wins[i])
     }
@@ -291,7 +290,7 @@ $(document).ready(function() {
    * @returns {Number} Score for a giving win combination
    */
   function evaluateCombo(combo) {
-    score = 0;
+    var score = 0;
 
     // one in a row
     if (board[combo[0] - 1] === "O")  score = 1;
